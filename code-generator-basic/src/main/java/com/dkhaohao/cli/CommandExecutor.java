@@ -1,6 +1,9 @@
-package com.dkhaohao.cli.command;
+package com.dkhaohao.cli;
 
 
+import com.dkhaohao.cli.command.ConfigCommand;
+import com.dkhaohao.cli.command.GenerateCommand;
+import com.dkhaohao.cli.command.ListCommand;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 

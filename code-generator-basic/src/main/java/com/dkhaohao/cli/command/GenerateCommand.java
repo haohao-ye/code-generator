@@ -27,11 +27,11 @@ public class GenerateCommand implements Callable<Integer> {
         MainGenerator.doGenerator(mainTemplateConfig);
         return 0;
     }
-    @Option(names = {"-l","--loop"},arity = "0..1",description = "是否循环",interactive = true)
+    @Option(names = {"-l","--loop"},arity = "0..1",description = "是否循环",interactive = true ,echo = true)
     private boolean loop;
-    @Option(names = {"-o","--outputText"},arity = "0..1",description = "输出文本",interactive = true)
+    @Option(names = {"-o","--outputText"},arity = "0..1",description = "输出文本",interactive = true ,echo = true)
     private String outputText;
-    @Option(names = {"-a","--author"},arity = "0..1",description = "作者",interactive = true)
+    @Option(names = {"-a","--author"},arity = "0..1",description = "作者",interactive = true,echo = true)
     private String author;
 
 }

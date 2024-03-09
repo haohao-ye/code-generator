@@ -1,9 +1,6 @@
 package com.dkhaohao;
 
-import com.dkhaohao.cli.command.CommandExecutor;
-import com.dkhaohao.generator.StaticGenerator;
-
-import java.io.File;
+import com.dkhaohao.cli.CommandExecutor;
 
 /**
  * @author dkhaohao
@@ -14,7 +11,6 @@ import java.io.File;
  */
 public class Main {
     public static void main(String[] args) {
-        args=new String[]{"list"};
         CommandExecutor commandExecutor=new CommandExecutor();
         commandExecutor.doExecute(args);
 
