@@ -6,9 +6,9 @@
   "author": "dkhaohao",
   "createTime": "2024-3-10",
   "fileConfig": {
-    "inputRootPath": "C:/Users/86135/Desktop/Project-Practice/code-generator/code-generator-demo-projects/acm-template-pro",
+    "inputRootPath": ".source/acm-template-pro",
     "outputRootPath": "generated",
-    "sourceRootPath": "C:/Users/86135/Desktop/Project-Practice/code-generator/code-generator-demo-projects/acm-template",
+    "sourceRootPath": "c:/Users/86135/Desktop/Project-Practice/code-generator/code-generator-demo-projects/acm-template-pro",
     "type": "dir",
     "files": [
       {
