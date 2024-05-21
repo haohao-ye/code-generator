@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.StrUtil;
 import com.dkhaohao.maker.generator.file.DynamicFileGenerator;
+import com.dkhaohao.maker.generator.main.GenerateTemplate;
 import com.dkhaohao.maker.meta.Meta;
 import com.dkhaohao.maker.meta.MetaManager;
 import freemarker.template.TemplateException;
@@ -18,10 +19,10 @@ import java.io.IOException;
  * @Description:
  * @date 2024/3/1112:11
  */
-public class MainGenerator {
+public class MainGenerator extends GenerateTemplate {
     public static void main(String[] args) throws TemplateException, IOException, InterruptedException {
         //获取Meta类
-        Meta meta = MetaManager.getMeta();
+/*        Meta meta = MetaManager.getMeta();
 
         //输出路径
         String projectPath = System.getProperty("user.dir");
@@ -123,7 +124,7 @@ public class MainGenerator {
         FileUtil.copy(shellDestPath,distDestPath,true);
         FileUtil.copy(shellDestPath+".bat",distDestPath,true);
         //拷贝源文件
-        FileUtil.copy(sourceCopyDestPath,distDestPath,true);
+        FileUtil.copy(sourceCopyDestPath,distDestPath,true);*/
 
 
 

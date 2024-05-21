@@ -3,6 +3,9 @@ generated
 .idea
 code-generator.iml
 code-generator-basic.iml
+generated-dist
+acme-templated-pro-generated-dist
+acme-templated-pro-generated
 
 
 

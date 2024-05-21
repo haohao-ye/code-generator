@@ -27,7 +27,7 @@ public abstract class GenerateTemplate {
 
         //输出根路径
         String projectPath = System.getProperty("user.dir");
-        String destPath = projectPath + File.separator + "generated";
+        String destPath = projectPath + File.separator + meta.getName();
         if (!FileUtil.exist(destPath)) {
             FileUtil.mkdir(destPath);
         }

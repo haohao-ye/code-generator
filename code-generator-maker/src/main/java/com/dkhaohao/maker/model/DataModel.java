@@ -14,14 +14,20 @@ public class DataModel {
     /**
      * 是否生成循环
      */
-    private boolean loop=true;
-    /**
-     * 作者名
-     */
-    private String author="dkhaohao";
-    /**
-     * 输出信息
-     */
-    private String outputText="sum = ";
+    public boolean loop = true;
+
+    public boolean needGit = true;
+    public MainTemplate mainTemplate = new MainTemplate();
+    @Data
+    public static class MainTemplate {
+        /**
+         * 作者名
+         */
+        public String author = "dkhaohao";
+        /**
+         * 输出信息
+         */
+        public String outputText = "sum = ";
+    }
 
 }

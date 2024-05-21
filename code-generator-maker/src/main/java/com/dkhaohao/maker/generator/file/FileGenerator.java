@@ -16,12 +16,12 @@ import java.io.IOException;
 public class FileGenerator {
     public static void main(String[] args) throws TemplateException, IOException {
         //创建数据模型
-        DataModel dataModel = new DataModel();
-        dataModel.setAuthor("dkhaohao");
-        dataModel.setLoop(false);
-        dataModel.setOutputText("结果");
+//        DataModel dataModel = new DataModel();
+//        dataModel.setAuthor("dkhaohao");
+//        dataModel.setLoop(false);
+//        dataModel.setOutputText("结果");
 
-        doGenerator(dataModel);
+//        doGenerator(dataModel);
     }
 
     /**
