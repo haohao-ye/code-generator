@@ -1,6 +1,7 @@
 ### Custom Template
 generated
 .idea
+.temp
 code-generator.iml
 code-generator-basic.iml
 generated-dist

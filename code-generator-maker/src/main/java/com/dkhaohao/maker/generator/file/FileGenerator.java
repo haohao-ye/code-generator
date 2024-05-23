@@ -1,6 +1,5 @@
 package com.dkhaohao.maker.generator.file;
 
-import com.dkhaohao.maker.model.DataModel;
 import freemarker.template.TemplateException;
 
 import java.io.File;
@@ -14,15 +13,6 @@ import java.io.IOException;
  * @date 2024/3/721:33
  */
 public class FileGenerator {
-    public static void main(String[] args) throws TemplateException, IOException {
-        //创建数据模型
-//        DataModel dataModel = new DataModel();
-//        dataModel.setAuthor("dkhaohao");
-//        dataModel.setLoop(false);
-//        dataModel.setOutputText("结果");
-
-//        doGenerator(dataModel);
-    }
 
     /**
      * 生成目标代码文件的方法
