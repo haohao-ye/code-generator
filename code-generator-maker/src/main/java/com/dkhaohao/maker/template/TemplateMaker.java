@@ -2,6 +2,7 @@ package com.dkhaohao.maker.template;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -16,9 +17,7 @@ import com.dkhaohao.maker.template.model.TemplateMakerFileConfig;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +57,10 @@ public class TemplateMaker {
         //构建文件过滤配置
         TemplateMakerFileConfig templateMakerFileConfig = new TemplateMakerFileConfig();
         TemplateMakerFileConfig.FileInfoConfig fileInfoConfig0 = new TemplateMakerFileConfig.FileInfoConfig();
+        TemplateMakerFileConfig.FileGroupConfig fileGroupConfig = new TemplateMakerFileConfig.FileGroupConfig();
+        fileGroupConfig.setGroupKey("test");
+        fileGroupConfig.setGroupName("common");
+        fileGroupConfig.setCondition("true");
         fileInfoConfig0.setPath(inputFilePath1);
         List<FileFilterConfig> fileFilterConfigs = new ArrayList<>();
         // 过滤文件名包含Base的文件(只对该文件夹下的文件进行过滤)
@@ -72,8 +75,9 @@ public class TemplateMaker {
         //不过滤
         fileInfoConfig1.setPath(inputFilePath2);
         templateMakerFileConfig.setFiles(Arrays.asList(fileInfoConfig0, fileInfoConfig1));
+        templateMakerFileConfig.setFileGroupConfig(fileGroupConfig);
 
-        long id = makeTemplate(newMeta, originalProjectPath, templateMakerFileConfig, modelInfo2, searchStr2, null);
+        long id = makeTemplate(newMeta, originalProjectPath, templateMakerFileConfig, modelInfo2, searchStr2, 1793466044556251136l);
         System.out.println("模版生成成功,id为：" + id);
 
     }
@@ -150,6 +154,25 @@ public class TemplateMaker {
         }
 
         // 三 生成配置文件
+        // 如果是文件组
+        TemplateMakerFileConfig.FileGroupConfig fileGroupConfig = templateMakerFileConfig.getFileGroupConfig();
+        if (fileGroupConfig != null) {
+            String groupKey = fileGroupConfig.getGroupKey();
+            String groupName = fileGroupConfig.getGroupName();
+            String condition = fileGroupConfig.getCondition();
+
+            // 新增分组配置
+            Meta.FileConfig.FileInfo groupFileInfo = new Meta.FileConfig.FileInfo();
+            groupFileInfo.setType(FileTypeEnum.GROUP.getValue());
+
+            groupFileInfo.setGroupKey(groupKey);
+            groupFileInfo.setGroupName(groupName);
+            groupFileInfo.setCondition(condition);
+            //文件全放到分组文件夹下
+            groupFileInfo.setFiles(newFileInfos);
+            newFileInfos = new ArrayList<>();
+            newFileInfos.add(groupFileInfo);
+        }
         String metaOutputpath = sourceRootPath + File.separator + "meta.json";
         //如果meta文件已经存在,则追加修改
         if (FileUtil.exist(metaOutputpath)) {
@@ -245,12 +268,41 @@ public class TemplateMaker {
      * @return
      */
     private static List<Meta.FileConfig.FileInfo> distinctFileInfos(List<Meta.FileConfig.FileInfo> fileInfos) {
+        //同分组合并,不同分组保留
+        // 先分组
+        Map<String, List<Meta.FileConfig.FileInfo>> groupKeyFileInfosMap = fileInfos
+                .stream()
+                .filter(fileInfo -> StrUtil.isNotBlank(fileInfo.getGroupKey()))
+                .collect(Collectors.groupingBy(Meta.FileConfig.FileInfo::getGroupKey));
+        // 再合并
+        // 去掉同分组重复文件配置
+        Map<String, Meta.FileConfig.FileInfo> groupKeyMergedFileInfoMap = new HashMap<>();
+        for (Map.Entry<String, List<Meta.FileConfig.FileInfo>> entry : groupKeyFileInfosMap.entrySet()) {
+            List<Meta.FileConfig.FileInfo> tempFileInfos = entry.getValue();
+            ArrayList<Meta.FileConfig.FileInfo> newFileInfos = new ArrayList<>(tempFileInfos
+                    .stream()
+                    .flatMap(fileInfo -> fileInfo.getFiles().stream())
+                    .collect(Collectors.toMap(Meta.FileConfig.FileInfo::getInputPath, o -> o, (e, r) -> r))
+                    .values());
 
-        return new ArrayList<>(fileInfos.stream()
-                .collect(
-                        Collectors.toMap(Meta.FileConfig.FileInfo::getInputPath, o -> o, (e, r) -> r)
-                ).values()
-        );
+            // 使用新的group配置
+            Meta.FileConfig.FileInfo newFileInfo = CollUtil.getLast(tempFileInfos);
+            newFileInfo.setFiles(newFileInfos);
+            groupKeyMergedFileInfoMap.put(entry.getKey(), newFileInfo);
+        }
+        // 将文件分组添加到结果列表
+        ArrayList<Meta.FileConfig.FileInfo> resultList = new ArrayList<>(groupKeyMergedFileInfoMap.values());
+
+        // 将未分组的文件添到结果列表
+        List<Meta.FileConfig.FileInfo> noGroupFileInfos = fileInfos
+                .stream().filter(fileInfo -> StrUtil.isBlank(fileInfo.getGroupKey())).collect(Collectors.toList());
+
+        resultList.addAll(new ArrayList<>(noGroupFileInfos.stream()
+                .collect(Collectors.toMap(Meta.FileConfig.FileInfo::getInputPath, o -> o, (e, r) -> r)).values()
+        ));
+
+
+        return resultList;
 
     }
 
