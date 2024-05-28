@@ -16,8 +16,8 @@ ${indent}private ${modelInfo.type} ${modelInfo.fieldName}<#if modelInfo.defaultV
 <#--    生成命令调用-->
 <#macro generateCommand indent modelInfo>
 ${indent}System.out.println("输入${modelInfo.groupName}配置: ");
-${indent}CommandLine commandline = new CommandLine(${modelInfo.type}Command.class);
-${indent}commandline.execute(${modelInfo.allArgsStr});
+${indent}CommandLine ${modelInfo.groupKey}Commandline = new CommandLine(${modelInfo.type}Command.class);
+${indent}${modelInfo.groupKey}Commandline.execute(${modelInfo.allArgsStr});
 </#macro>
 /**
  * @author ${author}
@@ -48,7 +48,7 @@ public class GenerateCommand implements Callable<Integer> {
             @Override
             public Integer call() throws Exception {
                 <#list modelInfo.models as subModelInfo>
-                    ${modelInfo.groupKey}.${subModelInfo.fieldName}="${subModelInfo.fieldName}";
+                    ${modelInfo.groupKey}.${subModelInfo.fieldName} = ${subModelInfo.fieldName};
                 </#list>
                 return 0;
             }

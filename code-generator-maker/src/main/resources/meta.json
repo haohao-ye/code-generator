@@ -57,7 +57,7 @@
       },
       {
         "groupKey": "mainTemplate",
-        "groupName" : "主模板",
+        "groupName": "主模板",
         "type": "MainTemplate",
         "description": "主模板相关配置",
         "condition": "loop",

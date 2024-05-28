@@ -1,0 +1,41 @@
+{
+  "id": 1,
+  "fileConfig": {
+    "files": [
+      {
+        "path": "src/main/resources/application.yml"
+      }
+    ]
+  },
+  "modelConfig": {
+    "modelGroupConfig": {
+      "groupKey": "mysqlConfig",
+      "groupName": "MYSQL Configuration",
+      "type": "MysqlConfig",
+      "description": "The configuration of MySQL database.",
+    },
+    "models": [
+      {
+        "fieldName": "url",
+        "type": "String",
+        "description": "The URL of the MySQL database.",
+        "defaultValue": "jdbc:mysql://localhost:3306/my_db",
+        "replaceText": "jdbc:mysql://localhost:3306/my_db"
+      },
+      {
+        "fieldName": "username",
+        "type": "String",
+        "description": "Username of the MySQL database.",
+        "defaultValue": "root",
+        "replaceText": "root"
+      },
+      {
+        "fieldName": "password",
+        "type": "String",
+        "description": "Password of the MySQL database.",
+        "defaultValue": "123456",
+        "replaceText": "123456"
+      }
+    ]
+  }
+}

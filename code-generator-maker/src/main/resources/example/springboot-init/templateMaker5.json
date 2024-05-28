@@ -1,0 +1,43 @@
+{
+  "id": 1,
+  "fileConfig": {
+    "files": [
+      {
+        "path": "src/main/java/com/yupi/springbootinit/config/Knife4jConfig.java",
+        "condiction": "needDocs"
+      }
+    ]
+  },
+  "modelConfig": {
+    "modelGroupConfig": {
+      "groupKey": "docsConfig",
+      "groupName": "Documentation Configuration",
+      "type": "DocsConfig",
+      "description": "Configuration for generating API documentation.",
+      "condition": "needDocs"
+    },
+    "models": [
+      {
+        "fieldName": "title",
+        "type": "String",
+        "description": "The title of the API documentation.",
+        "defaultValue": "Spring Boot API Documentation",
+        "replaceText": "接口文档"
+      },
+      {
+        "fieldName": "description",
+        "type": "String",
+        "description": "The description of the API documentation.",
+        "defaultValue": "This is the API documentation for Spring Boot.",
+        "replaceText": "spring-init"
+      },
+      {
+        "fieldName": "version",
+        "type": "String",
+        "description": "The version of the API documentation.",
+        "defaultValue": "1.0",
+        "replaceText": "1.0"
+      }
+    ]
+  }
+}

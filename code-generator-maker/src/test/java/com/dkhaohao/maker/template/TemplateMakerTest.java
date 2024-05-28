@@ -1,9 +1,12 @@
 package com.dkhaohao.maker.template;
 
+import cn.hutool.core.io.resource.ResourceUtil;
+import cn.hutool.json.JSONUtil;
 import com.dkhaohao.maker.meta.Meta;
 import com.dkhaohao.maker.template.enums.FileFilterRangeEnum;
 import com.dkhaohao.maker.template.enums.FileFilterRuleEnum;
 import com.dkhaohao.maker.template.model.FileFilterConfig;
+import com.dkhaohao.maker.template.model.TemplateMakerConfig;
 import com.dkhaohao.maker.template.model.TemplateMakerFileConfig;
 import com.dkhaohao.maker.template.model.TemplateMakerModelConfig;
 import org.junit.Test;
@@ -100,10 +103,64 @@ public class TemplateMakerTest {
         templateMakerFileConfig.setFileGroupConfig(fileGroupConfig);
 
         // 模版生成
-        long id = TemplateMaker.makeTemplate(newMeta, originalProjectPath, templateMakerFileConfig, templateMakerModelConfig, 1793571199779880960l);
+//        long id = TemplateMaker.makeTemplate(newMeta, originalProjectPath, templateMakerFileConfig, templateMakerModelConfig, 1793571199779880960l);
+//
+//        templateMakerFileConfig.setFiles(Arrays.asList(fileInfoConfig1));
+//        System.out.println("模版生成成功,id为：" + id);
 
-        templateMakerFileConfig.setFiles(Arrays.asList(fileInfoConfig1));
+    }
+    @Test
+    public void testMakeTemplate2() {
+        String rootPath = "example/springboot-init/";
+        String configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker.json");
+        TemplateMakerConfig templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        long id = TemplateMaker.makeTemplate(templateMakerConfig);
         System.out.println("模版生成成功,id为：" + id);
+    }
 
+    @Test
+    public void makeSpringbootTemplate() {
+        String rootPath = "example/springboot-init/";
+        String configStr ;
+        TemplateMakerConfig templateMakerConfig ;
+        long id ;
+         configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker.json");
+         templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+         id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker1.json");
+        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker2.json");
+        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker3.json");
+        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker4.json");
+        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker5.json");
+        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker6.json");
+        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker7.json");
+        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+
+        configStr = ResourceUtil.readUtf8Str(rootPath + "templateMaker8.json");
+        templateMakerConfig = JSONUtil.toBean(configStr, TemplateMakerConfig.class);
+        id = TemplateMaker.makeTemplate(templateMakerConfig);
+
+        System.out.println("模版生成成功,id为：" + id);
     }
 }

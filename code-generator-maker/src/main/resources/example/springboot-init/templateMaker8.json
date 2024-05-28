@@ -1,0 +1,22 @@
+{
+  "id": 1,
+  "fileConfig": {
+    "files": [
+      {
+        "path": "src/main/java/com/yupi/springbootinit/model/dto/post/PostEsDto.java",
+        "condition": "needPost && needEs"
+      }
+    ]
+  },
+  "modelConfig": {
+
+    "models": [
+      {
+        "fieldName": "needEs",
+        "type": "boolean",
+        "description": "Whether need to generate Elasticsearch",
+        "defaultValue": true
+      }
+    ]
+  }
+}

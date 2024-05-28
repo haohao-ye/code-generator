@@ -3,8 +3,6 @@ package com.dkhaohao.maker.template.enums;
 import cn.hutool.core.util.ObjectUtil;
 import lombok.Getter;
 
-import javax.annotation.Generated;
-
 /**
  * @Author dkhaohao
  * @Date 2024/5/22/16:54

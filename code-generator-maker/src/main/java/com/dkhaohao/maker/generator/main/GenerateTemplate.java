@@ -3,6 +3,7 @@ package com.dkhaohao.maker.generator.main;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.ZipUtil;
 import com.dkhaohao.maker.generator.JarGenerator;
 import com.dkhaohao.maker.generator.ScriptGenerator;
 import com.dkhaohao.maker.generator.file.DynamicFileGenerator;
@@ -21,6 +22,7 @@ import java.io.IOException;
  * @date 2024/3/1218:02
  */
 public abstract class GenerateTemplate {
+
     public void doGenerate() throws TemplateException, IOException, InterruptedException {
         //获取Meta类
         Meta meta = MetaManager.getMeta();
@@ -46,6 +48,27 @@ public abstract class GenerateTemplate {
         buildDist(destPath, sourceCopyDestPath, jarPath, shellDestPath);
 
     }
+    public void doGenerate(Meta meta, String outputPath) throws TemplateException, IOException, InterruptedException {
+        if (!FileUtil.exist(outputPath)) {
+            FileUtil.mkdir(outputPath);
+        }
+
+        // 1. 复制原始文件
+        String sourceCopyDestPath = copySource(meta, outputPath);
+
+
+        // 2. 生成代码
+        generateCode(meta, outputPath);
+
+        // 3. 构建jar包
+        String jarPath = buildJar(meta, outputPath);
+        // 4. 封装脚本
+        String shellDestPath = buildScript(outputPath, jarPath);
+
+        // 5. 精简版
+        buildDist(outputPath, sourceCopyDestPath, jarPath, shellDestPath);
+
+    }
 
     /**
      * 生成精简版
@@ -55,7 +78,7 @@ public abstract class GenerateTemplate {
      * @param shellDestPath
      */
 
-    protected void buildDist(String destPath, String sourceCopyDestPath, String jarPath, String shellDestPath) {
+    protected String buildDist(String destPath, String sourceCopyDestPath, String jarPath, String shellDestPath) {
         String distDestPath = destPath + "-dist";
         //拷贝jar包
         String targetAbsolutePath = distDestPath + File.separator + "target";
@@ -67,6 +90,7 @@ public abstract class GenerateTemplate {
         FileUtil.copy(shellDestPath + ".bat", distDestPath, true);
         //拷贝源文件
         FileUtil.copy(sourceCopyDestPath, distDestPath, true);
+        return distDestPath;
     }
 
     /**
@@ -97,6 +121,18 @@ public abstract class GenerateTemplate {
         return jarPath;
     }
 
+
+    /**
+     * 构建压缩包
+     * @param outputPath
+     * @return
+     */
+    protected String buildZip(String outputPath) {
+        String zipPath = outputPath + ".zip";
+        ZipUtil.zip(outputPath, zipPath);
+        return zipPath;
+    }
+
     /**
      * 生成代码
      *
@@ -109,7 +145,8 @@ public abstract class GenerateTemplate {
     protected void generateCode(Meta meta, String destPath) throws IOException, TemplateException {
         //读取Resource目录
         ClassPathResource classPathResource = new ClassPathResource("");
-        String resourceAbsolutePath = classPathResource.getAbsolutePath();
+//        String resourceAbsolutePath = classPathResource.getAbsolutePath();
+        String resourceAbsolutePath = "";
 
         //java 包基础路径
         String basePackage = meta.getBasePackage();
@@ -162,6 +199,11 @@ public abstract class GenerateTemplate {
         //generator.fileGenerator
         sourceModelPath = resourceAbsolutePath + File.separator + "templates/java/generator/FileGenerator.java.ftl";
         destModelPath = destJavaPath + File.separator + "generator/FileGenerator.java";
+        DynamicFileGenerator.doGenerator(sourceModelPath, destModelPath, meta);
+
+        //cli.command.JsonGenerateCommand
+        sourceModelPath = resourceAbsolutePath + File.separator + "templates/java/cli/command/JsonGenerateCommand.java.ftl";
+        destModelPath = destJavaPath + File.separator + "cli/command/JsonGenerateCommand.java";
         DynamicFileGenerator.doGenerator(sourceModelPath, destModelPath, meta);
 
         //pom.xml

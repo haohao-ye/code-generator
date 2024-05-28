@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "name": "acm-template-pro-generator",
+    "description": "ACM Template Pro Generator"
+  },
+  "originProjectPath": "../../../code-generator-demo-projects/acm-template-pro",
+  "fileConfig": {
+    "files": [
+      {
+        "path": "src/main/java/com/yupi/springbootinit/common"
+      }
+    ]
+  },
+  "modelConfig": {
+    "models": [
+      {
+        "fieldName": "className",
+        "type": "String",
+        "defaultValue": true,
+        "replaceText": "BaseResponse"
+      }
+    ]
+  }
+}
