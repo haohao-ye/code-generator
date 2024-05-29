@@ -1,7 +1,7 @@
 import {
   listGeneratorVoByPageFastUsingPost
-} from '../../../../../../知识星球/javaProject/yuzi-generator-master/yuzi-generator-web-frontend/src/services/backend/generatorController';
-import { listGeneratorVoByPageUsingPost} from "@/services/backend/generatorController";
+} from '@/services/backend/generatorController';
+// import { listGeneratorVoByPageUsingPost} from "@/services/backend/generatorController";
 import { UserOutlined } from '@ant-design/icons';
 import { PageContainer, ProFormSelect, ProFormText, QueryFilter } from '@ant-design/pro-components';
 import { Avatar, Card, Flex, Image, Input, List, message, Tabs, Tag, Typography } from 'antd';
@@ -38,7 +38,7 @@ const IndexPage: React.FC = () => {
   const doSearch = async () => {
     setLoading(true);
     try {
-      const res = await listGeneratorVoByPageUsingPost(searchParams);
+      const res = await listGeneratorVoByPageFastUsingPost(searchParams);
       setDataList(res.data?.records ?? []);
       setTotal(Number(res.data?.total) ?? 0);
     } catch (error: any) {

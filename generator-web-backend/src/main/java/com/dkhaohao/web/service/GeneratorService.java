@@ -46,9 +46,9 @@ public interface GeneratorService extends IService<Generator> {
     /**
      * 分页获取帖子封装
      *
-     * @param postPage
+     * @param generatorPage
      * @param request
      * @return
      */
-    Page<GeneratorVO> getGeneratorVOPage(Page<Generator> postPage, HttpServletRequest request);
+    Page<GeneratorVO> getGeneratorVOPage(Page<Generator> generatorPage, HttpServletRequest request);
 }

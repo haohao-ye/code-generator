@@ -8,7 +8,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @Data
-public class Meta {
+public class Meta implements Serializable {
 
     private String name;
     private String description;

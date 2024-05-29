@@ -2,6 +2,9 @@ package com.dkhaohao.web.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.dkhaohao.web.model.entity.Generator;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * @author 86135
@@ -10,6 +13,8 @@ import com.dkhaohao.web.model.entity.Generator;
  * @Entity com.dkhaohao.web.model.entity.Generator
  */
 public interface GeneratorMapper extends BaseMapper<Generator> {
+    @Select("select id, distPath from generator where isDelete = 1")
+    List<Generator> listDeleteGenerator();
 
 }
 

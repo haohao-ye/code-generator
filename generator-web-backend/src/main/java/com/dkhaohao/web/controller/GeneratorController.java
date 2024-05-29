@@ -1,37 +1,38 @@
 package com.dkhaohao.web.controller;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ZipUtil;
+import cn.hutool.core.lang.TypeReference;
+import cn.hutool.core.util.*;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dkhaohao.maker.generator.main.ZipGenerator;
+import com.dkhaohao.maker.meta.Meta;
 import com.dkhaohao.maker.meta.MetaValidator;
 import com.dkhaohao.web.annotation.AuthCheck;
 import com.dkhaohao.web.common.BaseResponse;
 import com.dkhaohao.web.common.DeleteRequest;
 import com.dkhaohao.web.common.ErrorCode;
 import com.dkhaohao.web.common.ResultUtils;
-import com.dkhaohao.web.constant.FileConstant;
 import com.dkhaohao.web.constant.UserConstant;
 import com.dkhaohao.web.exception.BusinessException;
 import com.dkhaohao.web.exception.ThrowUtils;
+import com.dkhaohao.web.manager.CacheManager;
 import com.dkhaohao.web.manager.CosManager;
-import com.dkhaohao.maker.meta.Meta;
 import com.dkhaohao.web.model.dto.generator.*;
 import com.dkhaohao.web.model.entity.Generator;
 import com.dkhaohao.web.model.entity.User;
 import com.dkhaohao.web.model.vo.GeneratorVO;
 import com.dkhaohao.web.service.GeneratorService;
 import com.dkhaohao.web.service.UserService;
+import com.dkhaohao.web.utils.CacheKey;
 import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.COSObjectInputStream;
 import com.qcloud.cos.utils.IOUtils;
-import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 帖子接口
@@ -66,6 +68,12 @@ public class GeneratorController {
 
     @Resource
     private CosManager cosManager;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private CacheManager cacheManager;
 
     @PostMapping("/make")
     public void makeGenerator(
@@ -173,7 +181,7 @@ public class GeneratorController {
         //定义独立的工作空间
         String projectPath = System.getProperty("user.dir");
         // 必须要用 userId 区分，否则可能会导致输入参数文件冲突
-        String tempDirPath = String.format("%s/.temp/use/%s%s", projectPath, id,loginUser.getId());
+        String tempDirPath = String.format("%s/.temp/use/%s%s", projectPath, id, loginUser.getId());
         String zipFilePath = tempDirPath + "/dist.zip";
 
         if (!FileUtil.exist(zipFilePath)) {
@@ -276,14 +284,20 @@ public class GeneratorController {
 
         //追踪时间
         log.info("用户 {} 下载文件 {}", loginUser, filePath);
+        // 设置响应头
+        response.setContentType("application/octet-stream;charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment;filename=" + filePath);
+        // 优先从缓存读取
+        String cacheFilePath = getCacheFilePath(id, filePath);
+        if (FileUtil.exist(cacheFilePath)) {
+            Files.copy(Paths.get(cacheFilePath), response.getOutputStream());
+            return;
+        }
 
         COSObjectInputStream cosObjectInput = null;
+
         try {
-            COSObject cosObject = cosManager.getObject(filePath);
-            cosObjectInput = cosObject.getObjectContent();
-            // 设置响应头
-            response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + filePath);
+
 /*            //流式传输
             try (OutputStream outputStream = response.getOutputStream()) {
                 byte[] buffer = new byte[1024 * 8];
@@ -295,6 +309,8 @@ public class GeneratorController {
             }catch (Exception e){
                 log.error("file download error, filePath:{}, e:{}", filePath, e);
             }*/
+            COSObject cosObject = cosManager.getObject(filePath);
+            cosObjectInput = cosObject.getObjectContent();
 
             // 输出文件流(从对象存储下载)
             byte[] buffer = IOUtils.toByteArray(cosObjectInput);
@@ -484,7 +500,6 @@ public class GeneratorController {
      * @return
      */
     @PostMapping("/edit")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> editGenerator(@RequestBody GeneratorEditRequest generatorEditRequest, HttpServletRequest request) {
         if (generatorEditRequest == null || generatorEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -515,16 +530,18 @@ public class GeneratorController {
     /**
      * 根据id下载
      *
-     * @param id
+     * @param generatorCacheRequest
      * @return
      */
     @GetMapping("/cache}")
-    public void cacheGenerator(long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (id <= 0) {
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public void cacheGenerator(@RequestBody GeneratorCacheRequest generatorCacheRequest, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (ObjectUtil.isEmpty(generatorCacheRequest) || generatorCacheRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
 
+        User loginUser = userService.getLoginUser(request);
+        Long id = generatorCacheRequest.getId();
         Generator generator = generatorService.getById(id);
         if (generator == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
@@ -535,41 +552,78 @@ public class GeneratorController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "产物包不存在");
         }
 
-        //追踪时间
-        log.info("用户 {} 下载文件 {}", loginUser, filePath);
+        String zipFilePath = getCacheFilePath(id, filePath);
 
-        COSObjectInputStream cosObjectInput = null;
-        try {
-            COSObject cosObject = cosManager.getObject(filePath);
-            cosObjectInput = cosObject.getObjectContent();
-            // 设置响应头
-            response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-Disposition", "attachment;filename=" + filePath);
-/*            //流式传输
-            try (OutputStream outputStream = response.getOutputStream()) {
-                byte[] buffer = new byte[1024 * 8];
-                int len = 0;
-                while ((len = cosObjectInput.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, len);
-                }
-                outputStream.flush();
-            }catch (Exception e){
-                log.error("file download error, filePath:{}, e:{}", filePath, e);
-            }*/
-
-            // 输出文件流(从对象存储下载)
-            byte[] buffer = IOUtils.toByteArray(cosObjectInput);
-            // 写入响应
-            response.getOutputStream().write(buffer);
-            response.getOutputStream().flush();
-        } catch (Exception e) {
-            log.error("file download error, filePath:{}, e:{}", filePath, e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件下载失败");
-        } finally {
-            if (cosObjectInput != null) {
-                cosObjectInput.close();
-            }
+        //新建文件
+        if (!FileUtil.exist(zipFilePath)) {
+            FileUtil.touch(zipFilePath);
         }
+
+        try {
+            cosManager.download(filePath, zipFilePath);
+        } catch (InterruptedException e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "下载生成器失败");
+        }
+
+
+    }
+
+    /**
+     * 快速获取分页列表
+     *
+     * @param generatorQueryRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/list/page/vo/fast")
+    public BaseResponse<Page<GeneratorVO>> listGeneratorVOByPageFast(@RequestBody GeneratorQueryRequest generatorQueryRequest,
+                                                                     HttpServletRequest request) {
+        long current = generatorQueryRequest.getCurrent();
+        long size = generatorQueryRequest.getPageSize();
+        // 优先从缓存读取
+        // 多级缓存
+        String pageCacheKey = CacheKey.getPageCacheKey(generatorQueryRequest);
+        String cacheValue = cacheManager.get(pageCacheKey);
+        if (cacheValue != null) {
+            Page<GeneratorVO> page = JSONUtil.toBean(cacheValue, new TypeReference<Page<GeneratorVO>>() {
+            },false);
+            return ResultUtils.success(page);
+        }
+//        ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
+//        String cacheValue = valueOperations.get(pageCacheKey);
+//        if (StrUtil.isNotBlank(cacheValue)) {
+//            Page<GeneratorVO> page = JSONUtil.toBean(cacheValue, new TypeReference<Page<GeneratorVO>>() {
+//            },false);
+//            return ResultUtils.success(page);
+//        }
+
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        QueryWrapper<Generator> queryWrapper = generatorService.getQueryWrapper(generatorQueryRequest);
+        // 仅返回必要字段,减少查询压力和传输数据量提高响应速度
+        queryWrapper.select("id", "name", "description", "tags", "status","picture", "createTime", "updateTime","userId");
+        Page<Generator> generatorPage = generatorService.page(new Page<>(current, size), queryWrapper);
+        Page<GeneratorVO> generatorVOPage = generatorService.getGeneratorVOPage(generatorPage, request);
+
+        // 缓存
+        cacheManager.put(pageCacheKey, JSONUtil.toJsonStr(generatorVOPage));
+        return ResultUtils.success(generatorVOPage);
+
+    }
+
+    /**
+     * 获取缓存路径
+     *
+     * @param id
+     * @param filePath
+     * @return
+     */
+    private String getCacheFilePath(Long id, String filePath) {
+        String projectPath = System.getProperty("user.dir");
+        String tempPath = String.format("%s.temp/cache/%s", projectPath, id);
+        String zipFilePath = String.format("%s/%s", tempPath, filePath);
+        return zipFilePath;
+
     }
 
 

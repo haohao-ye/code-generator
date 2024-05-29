@@ -6,7 +6,7 @@ spring:
     name: generator-web-backend
   # 默认 dev 环境
   profiles:
-    active: dev
+    active: local
   # 支持 swagger3
   mvc:
     pathmatch:
@@ -26,12 +26,12 @@ spring:
     password: 123456
   # Redis 配置
   # todo 需替换配置，然后取消注释
-  #  redis:
-  #    database: 1
-  #    host: localhost
-  #    port: 6379
-  #    timeout: 5000
-  #    password: 123456
+  redis:
+    database: 1
+    host: localhost
+    port: 6379
+    timeout: 5000
+    password: 123456
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
   #  elasticsearch:
@@ -52,6 +52,9 @@ server:
     session:
       cookie:
         max-age: 2592000
+  tomcat:
+    threads:
+      max: 1000
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
@@ -84,12 +87,12 @@ mybatis-plus:
 #    appSecret: xxx
 # 对象存储
 # todo 需替换配置
-cos:
-  client:
-    accessKey: xxx
-    secretKey: xxx
-    region: xxx
-    bucket: xxx
+#cos:
+#  client:
+#    accessKey: xxx
+#    secretKey: xxx
+#    region: xxx
+#    bucket: xxx
 # 接口文档配置
 knife4j:
   enable: true
@@ -101,3 +104,18 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.dkhaohao.web.controller
+# 定时任务配置
+xxl:
+  job:
+    admin:
+      addresses: http://127.0.0.1:8080/xxl-job-admin
+    accessToken: default_token
+    executor:
+      appname: generator-web-backend
+      ### xxl-job executor registry-address: default use address to registry , otherwise use ip:port if address is null
+      address:
+      ### xxl-job executor server-info
+      ip:
+      port: 9999
+      logpath: logs/jobhandler
+      logretentiondays: 30

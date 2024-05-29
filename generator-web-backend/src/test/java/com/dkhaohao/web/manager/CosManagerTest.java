@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 
 /**
  * Cos 操作测试
@@ -19,6 +20,22 @@ class CosManagerTest {
 
     @Test
     void putObject() {
-        cosManager.putObject("test", "test.json");
+        cosManager.putObject("test/test.json", "C:\\Users\\86135\\Desktop\\Project-Practice\\code-generator\\generator-web-backend\\sql\\tables_xxl_job.sql");
+    }
+
+
+    @Test
+    void deleteObject() {
+        cosManager.deleteObject("/test/test.json");
+    }
+
+    @Test
+    void deleteObjects() {
+        cosManager.deleteObjects(Arrays.asList("test/11个设计小技巧2.png", "test/img.png"));
+    }
+
+    @Test
+    void deleteDir() {
+        cosManager.deleteDir("test/");
     }
 }
