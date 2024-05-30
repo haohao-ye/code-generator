@@ -1,4 +1,4 @@
-### @author <a href="https://github.com/liyupi">程序员鱼皮</a> ###
+### @author dkhaohao ###
 ### @from <a href="https://yupi.icu">编程导航知识星球</a> ###
 
 HELP.md
@@ -146,3 +146,5 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 application-local.yml
+application-prod.yml
+generator-web-backend/src/main/resources/application-prod.yml

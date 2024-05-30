@@ -17,9 +17,9 @@ public class JarGenerator {
     
     public static void doGenerate(String projectDir) throws IOException, InterruptedException {
         //调用 Process类执行 Maven打包命令
-        String winMavenCommand = "mvn.cmd clean package -DskipTests=true";
+//        String winMavenCommand = "mvn.cmd clean package -DskipTests=true";
         String otherMavenCommand = "mvn clean package -DskipTests=true";
-        String mavenCommand=winMavenCommand;
+        String mavenCommand=otherMavenCommand;
         ProcessBuilder processBuilder = new ProcessBuilder(mavenCommand.split(" "));
         processBuilder.directory(new File(projectDir));
         Process process = processBuilder.start();

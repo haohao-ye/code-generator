@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 帖子接口
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+ * @author dkhaohao
  * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 @RestController
@@ -202,9 +202,10 @@ public class GeneratorController {
         FileUtil.writeUtf8String(jsonStr, dataModelFilePath);
 
         // 执行脚本
+        //windows使用"generator.bat" linux使用"generator"
         File scriptFile = FileUtil.loopFiles(unzipDistDir, 2, null)
                 .stream()
-                .filter(file -> file.isFile() && "generator.bat".equals(file.getName()))
+                .filter(file -> file.isFile() && "generator".equals(file.getName()))
                 .findFirst()
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR, "生成器脚本不存在"));
 
@@ -218,9 +219,13 @@ public class GeneratorController {
         }
 
         File scriptDir = scriptFile.getParentFile();
-        // mac/linux 使用"./generator"
-        String scriptAbsolutPath = scriptFile.getAbsolutePath().replace("\\", "/");
-        String[] commands = {scriptAbsolutPath, "json-generate", "--file=" + dataModelFilePath};
+        // windows
+//        String scriptAbsolutPath = scriptFile.getAbsolutePath().replace("\\", "/");
+//        String[] commands = {scriptAbsolutPath, "json-generate", "--file=" + dataModelFilePath};
+
+        // linux
+        String scriptAbsolutPath = scriptFile.getAbsolutePath();
+        String[] commands = {"./generator", "json-generate", "--file=" + dataModelFilePath};
 
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
         processBuilder.directory(scriptDir);

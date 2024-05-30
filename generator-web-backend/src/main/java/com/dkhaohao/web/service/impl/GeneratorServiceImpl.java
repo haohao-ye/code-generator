@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 /**
  * 帖子服务实现
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+ * @author dkhaohao
  * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 @Service
@@ -110,7 +110,7 @@ public class GeneratorServiceImpl extends ServiceImpl<GeneratorMapper, Generator
         if (StringUtils.isNotBlank(searchText)) {
             queryWrapper.and(qw -> qw.like("title", searchText).or().like("content", searchText));
         }
-        queryWrapper.like(StringUtils.isNotBlank(name), "title", name);
+        queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
         queryWrapper.like(StringUtils.isNotBlank(description), "content", description);
         if (CollUtil.isNotEmpty(tags)) {
             for (String tag : tags) {

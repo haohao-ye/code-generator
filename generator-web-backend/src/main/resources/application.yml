@@ -1,12 +1,12 @@
 # 公共配置文件
-# @author <a href="https://github.com/liyupi">程序员鱼皮</a>
+# @author dkhaohao
 # @from <a href="https://yupi.icu">编程导航知识星球</a>
 spring:
   application:
     name: generator-web-backend
   # 默认 dev 环境
   profiles:
-    active: local
+    active: dev
   # 支持 swagger3
   mvc:
     pathmatch:
@@ -22,7 +22,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/my_db
-    username: root
+    username: my_db
     password: 123456
   # Redis 配置
   # todo 需替换配置，然后取消注释
@@ -108,7 +108,7 @@ knife4j:
 xxl:
   job:
     admin:
-      addresses: http://127.0.0.1:8080/xxl-job-admin
+      addresses: http://localhost:8080/xxl-job-admin
     accessToken: default_token
     executor:
       appname: generator-web-backend
